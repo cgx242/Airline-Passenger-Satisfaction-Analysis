@@ -1,0 +1,142 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+## Wilcoxon signed-rank test
+
+we could use wilcoxon signed-rank test to 
+
+### load packages
+
+```{r}
+rm(list=ls())
+library("dplyr")
+library(tidyverse)
+library(PairedData)
+
+```
+
+
+### import data
+
+```{r}
+train<- read.csv("C:/Users/Lenovo/Desktop/Final Project/archive/train.csv")
+head(train)
+
+```
+
+
+### perform wilcoxon test
+
+transform data
+```{r}
+trian_tidy<-train%>%mutate(Gender = case_when(
+      Gender =="Male" ~1,
+       Gender =="Female"  ~0,
+    ))%>%mutate(Customer.Type = case_when(
+      Customer.Type =="Loyal Customer" ~1,
+       Customer.Type =="disloyal Customer"  ~0,
+    ))%>%mutate(Type.of.Travel = case_when(
+      Type.of.Travel =="Personal Travel" ~1,
+       Type.of.Travel =="Business travel"  ~0,
+    ))%>%mutate(Class = case_when(
+      Class =="Business" ~2,
+       Class =="Eco Plus"  ~1,
+        Class =="Eco"  ~0,
+    ))
+  
+```
+
+
+
+```{r}
+# split data set by satisfied 
+
+satisfied<- trian_tidy%>%filter(satisfaction == "satisfied")
+dissatisfied<- trian_tidy%>%filter(satisfaction == "neutral or dissatisfied")
+p1<-wilcox.test(satisfied$X,dissatisfied$X)$p.value
+p2<-wilcox.test(satisfied$id,dissatisfied$id)$p.value
+p3<-wilcox.test(satisfied$Gender,dissatisfied$Gender)$p.value
+p4<-wilcox.test(satisfied$Customer.Type,dissatisfied$Customer.Type)$p.value
+p5<-wilcox.test(satisfied$Age,dissatisfied$Age)$p.value
+p6<-wilcox.test(satisfied$Type.of.Travel,dissatisfied$Type.of.Travel)$p.value
+p7<-wilcox.test(satisfied$Class,dissatisfied$Class)$p.value
+p8<-wilcox.test(satisfied$Flight.Distance,dissatisfied$Flight.Distance)$p.value
+p9<-wilcox.test(satisfied$Inflight.wifi.service,dissatisfied$Inflight.wifi.service)$p.value
+p10<-wilcox.test(satisfied$Departure.Arrival.time.convenient,dissatisfied$Departure.Arrival.time.convenient)$p.value
+p11<-wilcox.test(satisfied$Ease.of.Online.booking,dissatisfied$Ease.of.Online.booking)$p.value
+p12<-wilcox.test(satisfied$Gate.location,dissatisfied$Gate.location)$p.value
+p13<-wilcox.test(satisfied$Food.and.drink,dissatisfied$Food.and.drink)$p.value
+p14<-wilcox.test(satisfied$Online.boarding,dissatisfied$Online.boarding)$p.value
+p15<-wilcox.test(satisfied$Seat.comfort,dissatisfied$Seat.comfort)$p.value
+p16<-wilcox.test(satisfied$Inflight.entertainment,dissatisfied$Inflight.entertainment)$p.value
+p17<-wilcox.test(satisfied$On.board.service,dissatisfied$On.board.service)$p.value
+p18<-wilcox.test(satisfied$Leg.room.service,dissatisfied$Leg.room.service)$p.value
+p19<-wilcox.test(satisfied$Baggage.handling,dissatisfied$Baggage.handling)$p.value
+p20<-wilcox.test(satisfied$Checkin.service,dissatisfied$Checkin.service)$p.value
+p21<-wilcox.test(satisfied$Inflight.service,dissatisfied$Inflight.service)$p.value
+p22<-wilcox.test(satisfied$Cleanliness,dissatisfied$Cleanliness)$p.value
+p23<-wilcox.test(satisfied$Departure.Delay.in.Minutes,dissatisfied$Departure.Delay.in.Minutes)$p.value
+p24<-wilcox.test(satisfied$Arrival.Delay.in.Minutes,dissatisfied$Arrival.Delay.in.Minutes)$p.value
+
+wilcox_p<-c(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24)
+
+wilcox_p
+```
+```{r}
+p1<-t.test(satisfied$X,dissatisfied$X)$p.value
+p2<-t.test(satisfied$id,dissatisfied$id)$p.value
+p3<-t.test(satisfied$Gender,dissatisfied$Gender)$p.value
+p4<-t.test(satisfied$Customer.Type,dissatisfied$Customer.Type)$p.value
+p5<-t.test(satisfied$Age,dissatisfied$Age)$p.value
+p6<-t.test(satisfied$Type.of.Travel,dissatisfied$Type.of.Travel)$p.value
+p7<-t.test(satisfied$Class,dissatisfied$Class)$p.value
+p8<-t.test(satisfied$Flight.Distance,dissatisfied$Flight.Distance)$p.value
+p9<-t.test(satisfied$Inflight.wifi.service,dissatisfied$Inflight.wifi.service)$p.value
+p10<-t.test(satisfied$Departure.Arrival.time.convenient,dissatisfied$Departure.Arrival.time.convenient)$p.value
+p11<-t.test(satisfied$Ease.of.Online.booking,dissatisfied$Ease.of.Online.booking)$p.value
+p12<-t.test(satisfied$Gate.location,dissatisfied$Gate.location)$p.value
+p13<-t.test(satisfied$Food.and.drink,dissatisfied$Food.and.drink)$p.value
+p14<-t.test(satisfied$Online.boarding,dissatisfied$Online.boarding)$p.value
+p15<-t.test(satisfied$Seat.comfort,dissatisfied$Seat.comfort)$p.value
+p16<-t.test(satisfied$Inflight.entertainment,dissatisfied$Inflight.entertainment)$p.value
+p17<-t.test(satisfied$On.board.service,dissatisfied$On.board.service)$p.value
+p18<-t.test(satisfied$Leg.room.service,dissatisfied$Leg.room.service)$p.value
+p19<-t.test(satisfied$Baggage.handling,dissatisfied$Baggage.handling)$p.value
+p20<-t.test(satisfied$Checkin.service,dissatisfied$Checkin.service)$p.value
+p21<-t.test(satisfied$Inflight.service,dissatisfied$Inflight.service)$p.value
+p22<-t.test(satisfied$Cleanliness,dissatisfied$Cleanliness)$p.value
+p23<-t.test(satisfied$Departure.Delay.in.Minutes,dissatisfied$Departure.Delay.in.Minutes)$p.value
+p24<-t.test(satisfied$Arrival.Delay.in.Minutes,dissatisfied$Arrival.Delay.in.Minutes)$p.value
+wilcox_p<-c(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24)
+
+wilcox_p
+```
+
+```{r}
+midpts<- barplot(wilcox_p, main="p value of wilcox", horiz=TRUE,
+  names.arg = c("X", "id" ,"Gender" , "Type","Age", "Travel" ,"Class","Dist.","Wifi","Time","book" ,"Gate", "Food","board","Seat","InflightE","Onboard" ,"Leg","Bag.","Checkin","InflightS","Clean","D.Delay","A.Delay"),las=2)
+
+```
+#histogram
+
+```{r}
+library(ggplot2)
+
+# stacked bar chart
+ggplot(trian_tidy, 
+       aes(x = Age, 
+           fill = satisfaction
+)) + 
+  geom_bar(position = "stack")
+```
+```{r}
+# stacked bar chart
+ggplot(trian_tidy, 
+       aes(x =Gate.location, 
+           fill = satisfaction
+)) + 
+  geom_bar(position = "stack")
+```
+
