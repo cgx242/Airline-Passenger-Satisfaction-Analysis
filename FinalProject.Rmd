@@ -3,9 +3,87 @@ output:
   word_document: default
   html_document: default
 ---
+
+Feature importance analysis
+
+For feature importance analysis, we divide training data into to groups by satisfaction: group of people who satisfied; who neutral or dissatisfied.
+
+Then we work on the population of each feature in two groups. 
+
+The basic idea is that if two populations of one specific feature in two groups have same distribution, then this feature is not important. 
+
+On the contrary, if these two population are very unlikely to be same, we could conclude that this feature is important.
+
+In this part we use two methods: paired Welch's two sample t-test (compare the mean) and Wilcoxon signed-rank test (distribution) to test the data.
+
+## Welch's two sample t-test
+
+Student's $t$-test assumes that the sample means being compared for two populations are normally distributed, and that the populations have equal variances. 
+
+Welch's $t$-test is designed for unequal population variances, but the assumption of normality is maintained. 
+
+Under the following Null assumption:
+
+Null: the two population means are equal, in which a two-tailed test,
+
+we run the test of each feature, the result is
+
+[picture]
+
+We could see, most of features are unlikely to have same mean, which indicates some importance. 
+
+However, this test only works under the assumption of normality and could only speak of mean. 
+
+
 ## Wilcoxon signed-rank test
 
-we could use wilcoxon signed-rank test to 
+Considering that the populations are not necessarily normally distributed, we use another test to analysis the importance of features.
+
+Wilcoxon test takes numerical data and tests its discrepancy between samples of different classes, namely satisfied and dissatisfied.
+
+The Wilcoxon Rank Sum Test takes numerical data for testing whether samples from two populations have the same distribution. The rank of data $x^{(k)}$ is
+$$
+r^{(k)}(x)=1+\sum_{j \neq k}\left(x^{(j)}<x^{(k)}\right)
+$$
+where $x^{(k)}$ denote the $k^{t h}$ observation of a feature. Use $y$ denote the response, and the Wilcoxon rank-sum statistic is:
+$$
+W(x)=\sum_{j=1}^{n} y^{(j)} r^{(j)}(x)
+$$
+The statistics $W$ will be large (small) if the values assumed by X are systematically larger (smaller) in the second population $(Y=1)$. Under the null hypothesis that the distribution of $X$ does not depend on $Y$, the distribution of $W$ only depends on the number of $y$ equals zero $\left(n_{0}\right)$ and the number of y equals one $\left(n_{1}\right)$. For large sample size $n$, one can use a Gaussian approximation,
+$$
+W(X) \sim N\left(\frac{n_{1}(n+1)}{2}, \frac{n_{0} n_{1}(n+1)}{12}\right)
+$$
+The smaller the p-value is, the more different the distributions of the two datasets are.
+
+An equivalent expression of Null hypothesis is:
+
+Null hypothesis $H_{0}$
+The observations $\left(X_{i}, Y_{i}\right)$ are exchangeable, meaning that $\left(X_{i}, Y_{i}\right)$ and $\left(Y_{i}, X_{i}\right)$ have the same distribution. Equivalently, $F(x, y)=F(y, x)$.
+
+
+Multiple Wilcoxon tests are performed on each feature between satisfied and dissatisfied groups. 
+
+[picture]
+
+There are three observations.  
+
+1:Distributions of id in two groups are different, with a very low p-value from the test. It is counterintuitive, because usually id assigned randomly. However, it could be explained by noticing id may reflecting some information of its holder, like Customer.Type. We could double examine this result by picturing it out:
+
+[picture]
+
+We chould see that the distribution of ages in these two groups indeed looks different.
+
+2: Distributions of Gate.location in two groups are likely to be the same, with a p-value around 0.9 from the test. So this feature is not important.
+
+[picture]
+
+3: Other features are important, unlikely to have same distribution in two groups.
+we could take " Age feature" and "Inflight.wifi.service" as examples:
+
+[picture]
+
+We chould see that the distribution of ages in these two groups indeed looks different.
+
 
 ### load packages
 
@@ -82,6 +160,7 @@ p24<-wilcox.test(satisfied$Arrival.Delay.in.Minutes,dissatisfied$Arrival.Delay.i
 
 wilcox_p<-c(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24)
 
+names(wilcox_p)<-c("X", "id" ,"Gender" , "Type","Age", "Travel" ,"Class","Dist.","Wifi","Time","book" ,"Gate", "Food","board","Seat","InflightE","Onboard" ,"Leg","Bag.","Checkin","InflightS","Clean","D.Delay","A.Delay")
 wilcox_p
 ```
 ```{r}
@@ -109,34 +188,58 @@ p21<-t.test(satisfied$Inflight.service,dissatisfied$Inflight.service)$p.value
 p22<-t.test(satisfied$Cleanliness,dissatisfied$Cleanliness)$p.value
 p23<-t.test(satisfied$Departure.Delay.in.Minutes,dissatisfied$Departure.Delay.in.Minutes)$p.value
 p24<-t.test(satisfied$Arrival.Delay.in.Minutes,dissatisfied$Arrival.Delay.in.Minutes)$p.value
-wilcox_p<-c(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24)
-
-wilcox_p
+t_p<-c(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24)
+names(t_p)<-c("X", "id" ,"Gender" , "Type","Age", "Travel" ,"Class","Dist.","Wifi","Time","book" ,"Gate", "Food","board","Seat","InflightE","Onboard" ,"Leg","Bag.","Checkin","InflightS","Clean","D.Delay","A.Delay")
+t_p
 ```
 
 ```{r}
-midpts<- barplot(wilcox_p, main="p value of wilcox", horiz=TRUE,
-  names.arg = c("X", "id" ,"Gender" , "Type","Age", "Travel" ,"Class","Dist.","Wifi","Time","book" ,"Gate", "Food","board","Seat","InflightE","Onboard" ,"Leg","Bag.","Checkin","InflightS","Clean","D.Delay","A.Delay"),las=2)
+midpts1<- barplot(wilcox_p, main="p value of wilcox", horiz=TRUE,las=2,col=rgb(1,0,0,1/4),
+        cex.names = 0.7)
+```
+
+```{r}
+midpts2<- barplot(t_p, main="p value of Welch's t", horiz=TRUE,
+  names.arg = c("X", "id" ,"Gender" , "Type","Age", "Travel" ,"Class","Dist.","Wifi","Time","book" ,"Gate", "Food","board","Seat","InflightE","Onboard" ,"Leg","Bag.","Checkin","InflightS","Clean","D.Delay","A.Delay"),las=2,col=rgb(0,0,1,1/4),cex.names = 0.7)
 
 ```
 #histogram
 
 ```{r}
-library(ggplot2)
-
-# stacked bar chart
-ggplot(trian_tidy, 
-       aes(x = Age, 
-           fill = satisfaction
-)) + 
-  geom_bar(position = "stack")
+wilcox.test(satisfied$id,dissatisfied$id)
+p1 <- hist(satisfied$id)
+p2 <- hist(dissatisfied$id)
+plot( p2, col=rgb(0,0,1,1/4), xlab = 'score',main = "id")  
+plot( p1, col=rgb(1,0,0,1/4), add=T)
+legend("bottomright", legend=c("dissatisfied", "satisfied"),
+       col=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), fill=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), cex=0.8)
 ```
 ```{r}
-# stacked bar chart
-ggplot(trian_tidy, 
-       aes(x =Gate.location, 
-           fill = satisfaction
-)) + 
-  geom_bar(position = "stack")
+wilcox.test(satisfied$Gate.location,dissatisfied$Gate.location)
+p1 <- hist(satisfied$Gate.location)
+p2 <- hist(dissatisfied$Gate.location)
+plot( p2, col=rgb(0,0,1,1/4), xlab = 'score',main="Gate.location")  
+plot( p1, col=rgb(1,0,0,1/4), add=T)
+legend("bottomright", legend=c("dissatisfied", "satisfied"),
+       col=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), fill=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), cex=0.8)
+```
+```{r}
+wilcox.test(satisfied$Age,dissatisfied$Age)
+p1 <- hist(satisfied$Age)
+p2 <- hist(dissatisfied$Age)
+plot( p2, col=rgb(0,0,1,1/4), xlab = 'score',main="Age")  
+plot( p1, col=rgb(1,0,0,1/4), add=T)
+legend("bottomright", legend=c("dissatisfied", "satisfied"),
+       col=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), fill=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), cex=0.8)
+```
+
+```{r}
+wilcox.test(satisfied$Inflight.wifi.service,dissatisfied$Inflight.wifi.service)
+p1 <- hist(satisfied$Inflight.wifi.service)
+p2 <- hist(dissatisfied$Inflight.wifi.service)
+plot( p2, col=rgb(0,0,1,1/4), xlab = 'score',main = "Inflight.wifi.service")  
+plot( p1, col=rgb(1,0,0,1/4), add=T)
+legend("bottomright", legend=c("dissatisfied", "satisfied"),
+       col=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), fill=c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)), cex=0.8)
 ```
 
